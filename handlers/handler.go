@@ -5,6 +5,8 @@ import (
 	"github.com/gorilla/mux"
 	"net/http"
 	"stock-microsrvc/models"
+    "strconv"
+    "stock-microsrvc/utils"
 )
 
 type Hello struct {
@@ -56,3 +58,21 @@ func InsertStock(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 }
+
+func GetStockHistory(w http.ResponseWriter, r *http.Request) {
+    setJson(w)
+    vars := mux.Vars(r)
+    days, err := strconv.Atoi(vars["days"])
+    utils.CheckErr(err)
+    stocks := models.NewStock(vars["symbol"]).GetStockDBHistory(days)
+
+    if err := json.NewEncoder(w).Encode(stocks); err != nil {
+        panic(err)
+    }
+}
+
+
+
+
+
+

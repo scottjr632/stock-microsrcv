@@ -39,4 +39,10 @@ var routes = Routes{
 		"/stock/{symbol}",
 		handlers.InsertStock,
 	},
+    Route{
+        "StockHistory",
+        "GET",
+        "/stock/history/{symbol}/{days}",
+        handlers.GetStockHistory,
+    },
 }

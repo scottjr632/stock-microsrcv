@@ -6,6 +6,14 @@ import (
 	"testing"
 )
 
+func TestHist(t *testing.T) {
+    fmt.Println("Running test...")
+    stock := models.NewStock("MU")
+    stocks := stock.GetStockDBHistory(7)
+    fmt.Println(stocks)
+}
+
+/*
 func TestInsert(t *testing.T) {
 	fmt.Println("Running test... ")
 	stock := models.NewStock("ABCD")
@@ -20,7 +28,6 @@ func TestInsertFail(t *testing.T) {
 	fmt.Println("Inserted")
 }
 
-/*
 func TestSelect(t *testing.T) {
    fmt.Println("Running test...")
    stock := models.NewStock("MU")

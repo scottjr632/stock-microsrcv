@@ -13,6 +13,8 @@ type Stock struct {
 	Date   time.Time `json:"date"`
 }
 
+type Stocks []Stock
+
 // NewStock creates a new stock object. The symbol
 // is required to create a new stock.
 func NewStock(symb string) *Stock {
@@ -33,6 +35,34 @@ func (s *Stock) SetPrice(price float64) {
 // SetDate sets the date of the stock.
 func (s *Stock) SetDate(date time.Time) {
 	s.Date = date
+}
+
+func (s *Stock) GetStockDBHistory(days int) Stocks {
+    now := time.Now()
+    queryDate := now.AddDate(0, 0, -days)
+    db, err := createDB()
+    utils.CheckErr(err)
+	stmt, err := db.Prepare(`select id, symb, price, time from stock_history_master 
+                          where upper(symb) = upper($1) and time > $2 
+                          order by time desc`)
+	res, err := stmt.Query(s.Symbol, queryDate)
+	utils.CheckErr(err)
+
+	var (
+		id     int
+		symb   string
+		price  float64
+		date   time.Time
+		stocks Stocks
+	)
+	for res.Next() {
+		if err := res.Scan(&id, &symb, &price, &date); err != nil {
+			panic(err)
+		}
+
+		stocks = append(stocks, Stock{id, symb, price, date})
+	}
+    return stocks
 }
 
 // UpdateDBPrice updates the database for the stock
