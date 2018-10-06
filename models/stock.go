@@ -71,16 +71,16 @@ func (s *Stock) GetStockDBPrice() float64 {
 	utils.CheckErr(err)
 
 	var price float64
-    var date time.Time
-    var id int
+	var date time.Time
+	var id int
 	for res.Next() {
 		if err := res.Scan(&id, &price, &date); err != nil {
 			panic(err)
 		}
 
 		s.Price = price
-        s.Date = date
-        s.ID = id
+		s.Date = date
+		s.ID = id
 		return price
 	}
 

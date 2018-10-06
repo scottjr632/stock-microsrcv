@@ -1,24 +1,25 @@
 package main
 
 import (
-    "fmt"
-    "testing"
-    "stock-microsrvc/models"
+	"fmt"
+	"stock-microsrvc/models"
+	"testing"
 )
 
 func TestInsert(t *testing.T) {
-    fmt.Println("Running test... ")
-    stock := models.NewStock("ABCD")
-    _ = models.InsertDBStock(stock)
-    fmt.Println("Inserted")
+	fmt.Println("Running test... ")
+	stock := models.NewStock("ABCD")
+	_ = models.InsertDBStock(stock)
+	fmt.Println("Inserted")
 }
 
 func TestInsertFail(t *testing.T) {
-    fmt.Println("Running test... ")
-    stock := models.NewStock("ABCD")
-    _ = models.InsertDBStock(stock)
-    fmt.Println("Inserted")
+	fmt.Println("Running test... ")
+	stock := models.NewStock("ABCD")
+	_ = models.InsertDBStock(stock)
+	fmt.Println("Inserted")
 }
+
 /*
 func TestSelect(t *testing.T) {
    fmt.Println("Running test...")
