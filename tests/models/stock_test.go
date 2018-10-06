@@ -6,6 +6,20 @@ import (
     "stock-microsrvc/models"
 )
 
+func TestInsert(t *testing.T) {
+    fmt.Println("Running test... ")
+    stock := models.NewStock("ABCD")
+    _ = models.InsertDBStock(stock)
+    fmt.Println("Inserted")
+}
+
+func TestInsertFail(t *testing.T) {
+    fmt.Println("Running test... ")
+    stock := models.NewStock("ABCD")
+    _ = models.InsertDBStock(stock)
+    fmt.Println("Inserted")
+}
+/*
 func TestSelect(t *testing.T) {
    fmt.Println("Running test...")
    stock := models.NewStock("MU")
@@ -20,3 +34,5 @@ func TestUpdate(t *testing.T) {
     stock.UpdateDBPrice(10.12)
     fmt.Println(*stock)
 }
+
+*/

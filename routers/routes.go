@@ -33,5 +33,11 @@ var routes = Routes {
         "/getuserinfo",
         handlers.GetUserInfo,
     },
+    Route {
+        "InsertStock",
+        "POST",
+        "/stock/{symbol}",
+        handlers.InsertStock,
+    },
 }
 

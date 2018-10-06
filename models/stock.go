@@ -7,7 +7,7 @@ import (
 )
 
 type Stock struct {
-	Id     int       `json:"id"`
+	ID     int       `json:"id"`
 	Symbol string    `json:"symbol"`
 	Price  float64   `json:"price"`
 	Date   time.Time `json:"date"`
@@ -50,37 +50,82 @@ func (s *Stock) UpdateDBPrice(price float64) {
 	fmt.Println("Stock updated...")
 }
 
-/*
 func InsertDBStock(s *Stock) error {
 	db, err := createDB()
 	defer db.Close()
 	utils.CheckErr(err)
 
-	stmt, err := db.Prepare(`insert into stocks.stocks (symb, price) values ($1, $2)`)
+	stmt, err := db.Prepare(`insert into stocks.stocks (symb, price) values (upper($1), $2)`)
+	utils.CheckErr(err)
+
+	_, err = stmt.Exec(s.Symbol, s.Price)
 	utils.CheckErr(err)
 
 	return err
 }
-*/
 
 func (s *Stock) GetStockDBPrice() float64 {
-   query := fmt.Sprintf("select price from stocks.stocks where upper(symb) = upper('%s')", s.Symbol)
+	query := fmt.Sprintf("select id, price, last_update from stocks.stocks where upper(symb) = upper('%s')", s.Symbol)
 
-    res, err := executeQuery(query)
-    utils.CheckErr(err)
+	res, err := executeQuery(query)
+	utils.CheckErr(err)
 
-    var price float64
+	var price float64
+    var date time.Time
+    var id int
+	for res.Next() {
+		if err := res.Scan(&id, &price, &date); err != nil {
+			panic(err)
+		}
 
-    for res.Next() {
-        if err := res.Scan(&price); err != nil {
-            panic(err)
-        }
+		s.Price = price
+        s.Date = date
+        s.ID = id
+		return price
+	}
 
-        s.Price = price
-        return price
-    }
-
-    return price
+	return price
 
 }
 
+func (s *Stock) DeleteDBStock() error {
+	db, err := createDB()
+	defer db.Close()
+	utils.CheckErr(err)
+
+	// Begin transaction
+	tx, err := db.Begin()
+	utils.CheckErr(err)
+
+	{
+
+		stmt, err := tx.Prepare("delete from stocks.stocks where upper(symb) = upper($1);")
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+		defer stmt.Close()
+
+		if _, err := stmt.Exec(s.Symbol); err != nil {
+			tx.Rollback()
+			return err
+		}
+
+	}
+	{
+		stmt, err := tx.Prepare("drop table $1;")
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+		defer stmt.Close()
+
+		if _, err := stmt.Exec(s.Symbol); err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+
+	return tx.Commit()
+
+}
