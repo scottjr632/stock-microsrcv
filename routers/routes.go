@@ -30,7 +30,7 @@ var routes = Routes {
     Route {
         "Test",
         "GET",
-        "/getuserinfo",
+        "/user/info/{email}",
         handlers.GetUserInfo,
     },
     Route {

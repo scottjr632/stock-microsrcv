@@ -23,7 +23,8 @@ func Index(w http.ResponseWriter, r *http.Request) {
 func GetUserInfo(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
-	user := models.User{Email: "scottjr632@gmail.com"}
+    vars := mux.Vars(r)
+	user := models.User{Email: vars["email"]}
 	user.SetUserInfo()
 	if err := json.NewEncoder(w).Encode(user); err != nil {
 		panic(err)
