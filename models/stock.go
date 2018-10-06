@@ -37,16 +37,21 @@ func (s *Stock) SetDate(date time.Time) {
 	s.Date = date
 }
 
-func (s *Stock) GetStockDBHistory(days int) Stocks {
+func (s *Stock) GetStockDBHistory(days int) (Stocks, error) {
     now := time.Now()
     queryDate := now.AddDate(0, 0, -days)
     db, err := createDB()
     utils.CheckErr(err)
-	stmt, err := db.Prepare(`select id, symb, price, time from stock_history_master 
-                          where upper(symb) = upper($1) and time > $2 
-                          order by time desc`)
-	res, err := stmt.Query(s.Symbol, queryDate)
-	utils.CheckErr(err)
+    query := fmt.Sprintf(`select id, symb, price, time from %s where
+                          time > $1 order by time desc`, s.Symbol)
+	stmt, err := db.Prepare(query)
+    if err != nil {
+        return nil, err
+    }
+    res, err := stmt.Query(queryDate)
+    if err != nil {
+        return nil, err
+    }
 
 	var (
 		id     int
@@ -62,7 +67,7 @@ func (s *Stock) GetStockDBHistory(days int) Stocks {
 
 		stocks = append(stocks, Stock{id, symb, price, date})
 	}
-    return stocks
+    return stocks, nil
 }
 
 // UpdateDBPrice updates the database for the stock

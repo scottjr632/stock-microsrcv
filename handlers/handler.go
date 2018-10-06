@@ -17,7 +17,7 @@ type Hello struct {
 // of the http.Response writer to json
 func setJson(w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.WriteHeader(http.StatusOK)
+    w.WriteHeader(http.StatusOK)
 }
 
 /* Index handler function */
@@ -64,10 +64,14 @@ func GetStockHistory(w http.ResponseWriter, r *http.Request) {
     vars := mux.Vars(r)
     days, err := strconv.Atoi(vars["days"])
     utils.CheckErr(err)
-    stocks := models.NewStock(vars["symbol"]).GetStockDBHistory(days)
+    stocks, err := models.NewStock(vars["symbol"]).GetStockDBHistory(days)
+    if err != nil {
+        json.NewEncoder(w).Encode(Hello{Message : "Something went wrong"})
+        return
+    }
 
     if err := json.NewEncoder(w).Encode(stocks); err != nil {
-        panic(err)
+        json.NewEncoder(w).Encode(Hello{Message : "Something went wrong"})
     }
 }
 
