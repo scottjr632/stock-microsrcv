@@ -22,13 +22,11 @@ func setJson(w http.ResponseWriter) {
 
 /* Index handler function */
 func Index(w http.ResponseWriter, r *http.Request) {
-	setJson(w)
-    message := `Welcome to the stock API. 
-	            To use the api call /api/v1/stock/price/{symbol of stock}
-                                    /api/v1/stock/history/{symbol of stock}/{history in days}`
-    if err := json.NewEncoder(w).Encode(Hello{Message: message}); err != nil {
-		panic(err)
-	}
+    message := `<html><body><h3>Welcome to the stock api</h3><p>To use call</p>
+                <p>/api/v1/stock/price/{symbol of stock}</p>
+                <p>/api/v1/stock/history/{symbol of stock}/{history in days}</p>
+                </html>`
+    w.Write([]byte(message))
 }
 
 func GetUserInfo(w http.ResponseWriter, r *http.Request) {
