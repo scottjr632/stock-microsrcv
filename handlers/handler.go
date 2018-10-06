@@ -23,7 +23,10 @@ func setJson(w http.ResponseWriter) {
 /* Index handler function */
 func Index(w http.ResponseWriter, r *http.Request) {
 	setJson(w)
-	if err := json.NewEncoder(w).Encode(Hello{Message: "Hello, World!"}); err != nil {
+    message := `Welcome to the stock API. 
+	            To use the api call /api/v1/stock/price/{symbol of stock}
+                                    /api/v1/stock/history/{symbol of stock}/{history in days}`
+    if err := json.NewEncoder(w).Encode(Hello{Message: message}); err != nil {
 		panic(err)
 	}
 }
