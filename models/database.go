@@ -3,8 +3,10 @@ package models
 import (
 	"database/sql"
 	"fmt"
-	_ "github.com/lib/pq"
+	"os"
 	"stock-microsrvc/utils"
+
+	_ "github.com/lib/pq" // Blank because it is a necessary driver.
 )
 
 const (
@@ -31,8 +33,11 @@ func executeQuery(query string) (*sql.Rows, error) {
 // createDB creates a new postgres DB instance. `defer db.Close() is required
 // if you use this function to create a new DB instance.
 func createDB() (*sql.DB, error) {
-	dbinfo := fmt.Sprintf("user=%s password=%s dbname=%s port=%s host=%s sslmode=disable",
-		DB_USER, DB_PASSWORD, DB_NAME, DB_PORT, DB_HOST)
-	return sql.Open("postgres", dbinfo)
+	dbinfo, ok := os.LookupEnv("STOCK_DATABASE_URL")
 
+	if !ok {
+		dbinfo = fmt.Sprintf("user=%s password=%s dbname=%s port=%s host=%s sslmode=disable",
+			DB_USER, DB_PASSWORD, DB_NAME, DB_PORT, DB_HOST)
+	}
+	return sql.Open("postgres", dbinfo)
 }
