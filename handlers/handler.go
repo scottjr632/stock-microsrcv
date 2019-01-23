@@ -2,11 +2,12 @@ package handlers
 
 import (
 	"encoding/json"
-	"github.com/gorilla/mux"
 	"net/http"
 	"stock-microsrvc/models"
-    "strconv"
-    "stock-microsrvc/utils"
+	"stock-microsrvc/utils"
+	"strconv"
+
+	"github.com/gorilla/mux"
 )
 
 type Hello struct {
@@ -17,16 +18,16 @@ type Hello struct {
 // of the http.Response writer to json
 func setJson(w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-    w.WriteHeader(http.StatusOK)
+	w.WriteHeader(http.StatusOK)
 }
 
 /* Index handler function */
 func Index(w http.ResponseWriter, r *http.Request) {
-    message := `<html><body><h3>Welcome to the stock api</h3><p>To use call</p>
+	message := `<html><body><h3>Welcome to the stock api</h3><p>To use call</p>
                 <p>/api/v1/stock/price/{symbol of stock}</p>
                 <p>/api/v1/stock/history/{symbol of stock}/{history in days}</p>
                 </html>`
-    w.Write([]byte(message))
+	w.Write([]byte(message))
 }
 
 func GetUserInfo(w http.ResponseWriter, r *http.Request) {
@@ -61,23 +62,35 @@ func InsertStock(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetStockHistory(w http.ResponseWriter, r *http.Request) {
-    setJson(w)
-    vars := mux.Vars(r)
-    days, err := strconv.Atoi(vars["days"])
-    utils.CheckErr(err)
-    stocks, err := models.NewStock(vars["symbol"]).GetStockDBHistory(days)
-    if err != nil {
-        json.NewEncoder(w).Encode(Hello{Message : "Something went wrong"})
-        return
-    }
+	setJson(w)
+	vars := mux.Vars(r)
+	days, err := strconv.Atoi(vars["days"])
+	utils.CheckErr(err)
+	stocks, err := models.NewStock(vars["symbol"]).GetStockDBHistory(days)
+	if err != nil {
+		json.NewEncoder(w).Encode(Hello{Message: "Something went wrong"})
+		return
+	}
 
-    if err := json.NewEncoder(w).Encode(stocks); err != nil {
-        json.NewEncoder(w).Encode(Hello{Message : "Something went wrong"})
-    }
+	if err := json.NewEncoder(w).Encode(stocks); err != nil {
+		json.NewEncoder(w).Encode(Hello{Message: "Something went wrong"})
+	}
 }
 
+func GetAllStockSymbs(w http.ResponseWriter, r *http.Request) {
+	setJson(w)
 
+	stocks, err := models.GetAllStockDBSymbols()
+	if err != nil {
+		json.NewEncoder(w).Encode(Hello{Message: "something went wrong"})
+		w.Header(http.StatusInternalServerError)
+		return
+	}
 
+	if err := json.NewEncoder(w).Encode(stocks); err != nil {
+		json.NewEncoder(w).Encode(Hello{Message: "Something went wrong"})
+		w.Header(http.StatusInternalServerError)
+	}
 
-
-
+	return
+}

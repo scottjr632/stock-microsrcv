@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+// Stock ...
 type Stock struct {
 	ID     int       `json:"id"`
 	Symbol string    `json:"symbol"`
@@ -13,6 +14,7 @@ type Stock struct {
 	Date   time.Time `json:"date"`
 }
 
+// Stocks ...
 type Stocks []Stock
 
 // NewStock creates a new stock object. The symbol
@@ -37,21 +39,56 @@ func (s *Stock) SetDate(date time.Time) {
 	s.Date = date
 }
 
+func GetAllStockDBSymbols() (Stocks, error) {
+	db, err := createDB()
+	utils.CheckErr(err)
+	query := fmt.Sprintf(`
+		select symb from stocks.stocks
+	`)
+
+	stmt, err := db.Prepare(query)
+	if err != nil {
+		return nil, err
+	}
+	res, err := stmt.Query()
+	if err != nil {
+		return nil, err
+	}
+
+	type t_struct struct { Symbol string `json:"symbol"` }
+	type t_structs t_struct[]
+
+	var (
+		symbol string
+		stocks t_structs
+	)
+
+	for res.Next() {
+		if err := res.Scan(&symb); err != nil {
+			panic(err)
+		}
+
+		stocks = append(stocks, t_struct{symb})
+	}
+	return stocks, nil
+}
+
+// GetStockDBHistory ...
 func (s *Stock) GetStockDBHistory(days int) (Stocks, error) {
-    now := time.Now()
-    queryDate := now.AddDate(0, 0, -days)
-    db, err := createDB()
-    utils.CheckErr(err)
-    query := fmt.Sprintf(`select id, symb, price, time from %s where
+	now := time.Now()
+	queryDate := now.AddDate(0, 0, -days)
+	db, err := createDB()
+	utils.CheckErr(err)
+	query := fmt.Sprintf(`select id, symb, price, time from %s where
                           time > $1 order by time desc`, s.Symbol)
 	stmt, err := db.Prepare(query)
-    if err != nil {
-        return nil, err
-    }
-    res, err := stmt.Query(queryDate)
-    if err != nil {
-        return nil, err
-    }
+	if err != nil {
+		return nil, err
+	}
+	res, err := stmt.Query(queryDate)
+	if err != nil {
+		return nil, err
+	}
 
 	var (
 		id     int
@@ -67,7 +104,7 @@ func (s *Stock) GetStockDBHistory(days int) (Stocks, error) {
 
 		stocks = append(stocks, Stock{id, symb, price, date})
 	}
-    return stocks, nil
+	return stocks, nil
 }
 
 // UpdateDBPrice updates the database for the stock

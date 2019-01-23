@@ -19,7 +19,7 @@ var routes = Routes{
 		"Index",
 		"GET",
 		"/",
-		handlers.Index,
+		handlers.GetAllStockSymbs,
 	},
 	Route{
 		"Stockprice",
@@ -39,10 +39,16 @@ var routes = Routes{
 		"/stock/{symbol}",
 		handlers.InsertStock,
 	},
-    Route{
-        "StockHistory",
-        "GET",
-        "/stock/history/{symbol}/{days}",
-        handlers.GetStockHistory,
-    },
+	Route{
+		"StockHistory",
+		"GET",
+		"/stock/history/{symbol}/{days}",
+		handlers.GetStockHistory,
+	},
+	Route{
+		"StockSymbols",
+		"GET",
+		"/stocks",
+		handlers.GetAllStockSymbs,
+	},
 }
