@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"stock-microsrvc/models"
 	"stock-microsrvc/utils"
@@ -18,7 +19,6 @@ type Hello struct {
 // of the http.Response writer to json
 func setJson(w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.WriteHeader(http.StatusOK)
 }
 
 /* Index handler function */
@@ -83,13 +83,16 @@ func GetAllStockSymbs(w http.ResponseWriter, r *http.Request) {
 	stocks, err := models.GetAllStockDBSymbols()
 	if err != nil {
 		json.NewEncoder(w).Encode(Hello{Message: "something went wrong"})
-		w.Header(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Println(err)
 		return
 	}
 
 	if err := json.NewEncoder(w).Encode(stocks); err != nil {
 		json.NewEncoder(w).Encode(Hello{Message: "Something went wrong"})
-		w.Header(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Println(err)
+		return
 	}
 
 	return

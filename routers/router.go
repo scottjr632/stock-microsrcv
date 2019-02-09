@@ -1,9 +1,10 @@
 package routers
 
 import (
-	"github.com/gorilla/mux"
 	"net/http"
 	"stock-microsrvc/utils"
+
+	"github.com/gorilla/mux"
 )
 
 func NewRouter() *mux.Router {

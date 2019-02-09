@@ -43,7 +43,7 @@ func GetAllStockDBSymbols() (Stocks, error) {
 	db, err := createDB()
 	utils.CheckErr(err)
 	query := fmt.Sprintf(`
-		select symb from stocks.stocks
+		select id, symb, price, last_update from stocks.stocks order by last_update desc
 	`)
 
 	stmt, err := db.Prepare(query)
@@ -55,20 +55,19 @@ func GetAllStockDBSymbols() (Stocks, error) {
 		return nil, err
 	}
 
-	type t_struct struct { Symbol string `json:"symbol"` }
-	type t_structs t_struct[]
-
 	var (
-		symbol string
-		stocks t_structs
+		id     int
+		symb   string
+		price  float64
+		date   time.Time
+		stocks Stocks
 	)
-
 	for res.Next() {
-		if err := res.Scan(&symb); err != nil {
+		if err := res.Scan(&id, &symb, &price, &date); err != nil {
 			panic(err)
 		}
 
-		stocks = append(stocks, t_struct{symb})
+		stocks = append(stocks, Stock{id, symb, price, date})
 	}
 	return stocks, nil
 }
