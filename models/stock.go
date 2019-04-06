@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"log"
 	"stock-microsrvc/utils"
 	"time"
 )
@@ -40,13 +41,11 @@ func (s *Stock) SetDate(date time.Time) {
 }
 
 func GetAllStockDBSymbols() (Stocks, error) {
-	db, err := createDB()
-	utils.CheckErr(err)
 	query := fmt.Sprintf(`
 		select id, symb, price, last_update from stocks.stocks order by last_update desc
 	`)
 
-	stmt, err := db.Prepare(query)
+	stmt, err := dbpool.Prepare(query)
 	if err != nil {
 		return nil, err
 	}
@@ -76,16 +75,12 @@ func GetAllStockDBSymbols() (Stocks, error) {
 func (s *Stock) GetStockDBHistory(days int) (Stocks, error) {
 	now := time.Now()
 	queryDate := now.AddDate(0, 0, -days)
-	db, err := createDB()
-	utils.CheckErr(err)
 	query := fmt.Sprintf(`select id, symb, price, time from %s where
                           time > $1 order by time desc`, s.Symbol)
-	stmt, err := db.Prepare(query)
+
+	res, err := executeQuery(dbpool, query, s.Symbol, queryDate)
 	if err != nil {
-		return nil, err
-	}
-	res, err := stmt.Query(queryDate)
-	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
 
@@ -109,11 +104,8 @@ func (s *Stock) GetStockDBHistory(days int) (Stocks, error) {
 // UpdateDBPrice updates the database for the stock
 // with the given price.
 func (s *Stock) UpdateDBPrice(price float64) {
-	db, err := createDB()
-	defer db.Close()
-	utils.CheckErr(err)
 
-	stmt, err := db.Prepare(`update stocks.stocks set price = $1 where symb = $2`)
+	stmt, err := dbpool.Prepare(`update stocks.stocks set price = $1 where symb = $2`)
 	utils.CheckErr(err)
 
 	_, err = stmt.Exec(price, s.Symbol)
@@ -122,11 +114,8 @@ func (s *Stock) UpdateDBPrice(price float64) {
 }
 
 func InsertDBStock(s *Stock) error {
-	db, err := createDB()
-	defer db.Close()
-	utils.CheckErr(err)
 
-	stmt, err := db.Prepare(`insert into stocks.stocks (symb, price) values (upper($1), $2)`)
+	stmt, err := dbpool.Prepare(`insert into stocks.stocks (symb, price) values (upper($1), $2)`)
 	utils.CheckErr(err)
 
 	_, err = stmt.Exec(s.Symbol, s.Price)
@@ -138,7 +127,7 @@ func InsertDBStock(s *Stock) error {
 func (s *Stock) GetStockDBPrice() float64 {
 	query := fmt.Sprintf("select id, price, last_update from stocks.stocks where upper(symb) = upper('%s')", s.Symbol)
 
-	res, err := executeQuery(query)
+	res, err := executeQuery(dbpool, query)
 	utils.CheckErr(err)
 
 	var price float64
@@ -160,12 +149,9 @@ func (s *Stock) GetStockDBPrice() float64 {
 }
 
 func (s *Stock) DeleteDBStock() error {
-	db, err := createDB()
-	defer db.Close()
-	utils.CheckErr(err)
 
 	// Begin transaction
-	tx, err := db.Begin()
+	tx, err := dbpool.Begin()
 	utils.CheckErr(err)
 
 	{

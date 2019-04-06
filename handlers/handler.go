@@ -69,6 +69,7 @@ func GetStockHistory(w http.ResponseWriter, r *http.Request) {
 	stocks, err := models.NewStock(vars["symbol"]).GetStockDBHistory(days)
 	if err != nil {
 		json.NewEncoder(w).Encode(Hello{Message: "Something went wrong"})
+		log.Println(err)
 		return
 	}
 

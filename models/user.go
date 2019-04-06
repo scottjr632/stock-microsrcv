@@ -34,7 +34,7 @@ func (u *User) SetUserInfo() {
 	query := fmt.Sprintf("select id, fname, lname from users.users where email like '%s'", u.Email)
 
 	// TODO : add chechErr function
-	res, err := executeQuery(query)
+	res, err := executeQuery(dbpool, query)
 	utils.CheckErr(err)
 
 	for res.Next() {
